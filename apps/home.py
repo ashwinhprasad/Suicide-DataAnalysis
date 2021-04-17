@@ -31,7 +31,7 @@ def missing():
     st.pyplot(fig)
 
 def correlation():
-    st.title('Correlation Between Varialbles')
+    st.title('Correlation Between Variables')
     st.write("""
         Obviously, we can see that the population has a linear relationshio with the 
         number of suicides. So, for further analysis, we could use the number of suicides per 100k

@@ -18,7 +18,7 @@ class multiapp:
     # running the instance
     def run(self):
         app = st.selectbox(
-            'Navigation',
+            'Pages',
             self.apps,
             format_func=lambda app:app['title']
         )

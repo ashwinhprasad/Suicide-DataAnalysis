@@ -29,10 +29,8 @@ def missing():
     fig = plt.figure(figsize=(12,6))
     sns.heatmap(df.isna(),yticklabels=0)
     st.pyplot(fig)
-    df.drop(['HDI for year'],axis=1,inplace=True)
 
 def correlation():
-    df.drop(['HDI for year'],axis=1,inplace=True)
     st.title('Correlation Between Varialbles')
     st.write("""
         Obviously, we can see that the population has a linear relationshio with the 
@@ -40,7 +38,7 @@ def correlation():
         people rather than the number of suicides column for comparison between different countries
     """)
     fig = plt.figure(figsize=(8,5))
-    sns.heatmap(df.corr())
+    sns.heatmap(df.drop(['HDI for year'],axis=1).corr())
     st.pyplot(fig)
 
 

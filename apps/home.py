@@ -3,8 +3,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
+@st.cache
+def get_dataset():
+    return pd.read_csv("./data/master.csv")
 
-df = pd.read_csv("./data/master.csv")
+df = get_dataset()
 
 def dataset():
     st.title('Dataset')
@@ -19,7 +22,6 @@ def dataset():
     st.write(df.head())
 
 def missing():
-    df = pd.read_csv("./data/master.csv")
     st.title('Dealing with Missing Values')
     st.write("""
         As we can see below, the 'HDI for year' column is filled with missing values
@@ -54,6 +56,5 @@ def app():
 
     # missing values and correlation
     missing()
-
     correlation()
     

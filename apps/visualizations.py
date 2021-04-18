@@ -6,46 +6,21 @@ import plotly.graph_objects as go
 
 @st.cache
 def fetch_data():
-    data = pd.read_csv("./data/master.csv")
-    return data
-
-@st.cache
-def preprocess_data():
-    data = pd.read_csv("./data/master.csv")
-
-    country_list = list(data['country'].drop_duplicates())
-    year_list = list(data['year'].drop_duplicates())
-    year_list.sort()
-    country = []
-    year = []
-    no_of_suicides = []
-    for countryname in country_list:
-        for yearname in year_list:
-            country.append(countryname)
-            year.append(yearname)
-            try:
-                no_of_suicides.append(data.groupby(['country','year']).get_group((countryname,yearname))['suicides/100k pop'].sum())
-            except:
-                no_of_suicides.append(0)
-                
-    # convertion to dataframe
-    df1 = pd.DataFrame({
-        'Country':country,
-        'Year':year,
-        'Suicides per 100k':no_of_suicides
-    })
-    return df1
-
-
+    df0 = pd.read_csv("./data/master.csv")
+    df1 = pd.read_csv("./data/df1.csv")
+    df2 = pd.read_csv("./data/df2.csv")
+    df3 = pd.read_csv("./data/df3.csv")
+    df4 = pd.read_csv("./data/df4.csv")
+    df5 = pd.read_csv("./data/df5.csv")
+    return (df0,df1,df2,df3,df4,df5)
 
 df = fetch_data()
-df1 = preprocess_data()
 
 def suicide_rates():
     st.title("Sucide Rate per Country Each Year")
     
     # plot
-    fig = px.scatter(df1,x='Country',y='Suicides per 100k',animation_frame='Year',size='Suicides per 100k',color='Country')
+    fig = px.scatter(df[1],x='Country',y='Suicides per 100k',animation_frame='Year',size='Suicides per 100k',color='Country')
     fig.update_layout(
         xaxis={
             'showticklabels':False,
@@ -60,18 +35,8 @@ def suicide_rates():
 
 def timeseries():
     st.title("Number of Suicides over the Years")
-    year_list = list(df['year'].drop_duplicates())
-    year_list.sort()
-    deaths_per_year = []
-    for yearname in year_list:
-        deaths_per_year.append(df.groupby('year').get_group(yearname)['suicides_no'].sum())
-
-    df2 = pd.DataFrame({
-        'year':year_list,
-        'deaths':deaths_per_year
-    })
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=year_list,y=deaths_per_year,marker={'color':'red'},mode='lines+markers',hovertext=year_list,hoverinfo='text'))
+    fig.add_trace(go.Scatter(x=df[2]['year'],y=df[2]['deaths'],marker={'color':'red'},mode='lines+markers',hovertext=df[2]['year'],hoverinfo='text'))
     fig.update_layout(
         xaxis_title='Year',
         yaxis_title='Suicides',
@@ -86,8 +51,8 @@ def gender():
         females by a very large margin. Difference in the male and female population might
         have a slight contribution to this. But still, the difference is huge
     """)
-    malecount = df.groupby('sex').get_group('male')['suicides_no'].sum()
-    femalecount = df.groupby('sex').get_group('female')['suicides_no'].sum()
+    malecount = df[0].groupby('sex').get_group('male')['suicides_no'].sum()
+    femalecount = df[0].groupby('sex').get_group('female')['suicides_no'].sum()
     fig = px.bar(x=['Male','Female'],y=[malecount,femalecount],color=[malecount,femalecount])
     fig.update_layout(
         title='Gender vs Suicides',
@@ -102,17 +67,7 @@ def generations():
         The Boomer Generation has suffered the most from this problem, followed by the Silent
         Generation.
     """)
-    generationlist = list(df['generation'].drop_duplicates())
-    generations = []
-    deaths = []
-    for generation in generationlist:
-        generations.append(generation)
-        deaths.append(df.groupby('generation').get_group(generation)['suicides_no'].sum())
-    df3 = pd.DataFrame({
-        'generations':generations,
-        'deaths':deaths
-    })
-    fig = px.pie(df3,values='deaths',names='generations')
+    fig = px.pie(df[3],values='deaths',names='generations')
     fig.update_layout(
         title='Distribution of deaths over different generations'
     )
@@ -124,15 +79,8 @@ def gdp_per_capita():
         of suicides, it can be seen that as the gdp increases, the suicide rate gradually
         decreases.
     """)
-    country_year_list = list(df['country-year'].drop_duplicates())
-    gdp = []
-    suicides = []
-    for countryyear in country_year_list:
-        gdp.append(df[['country-year','gdp_per_capita ($)','suicides/100k pop']].groupby('country-year').get_group(countryyear)['gdp_per_capita ($)'].iloc[0])
-        suicides.append(df[['country-year','gdp_per_capita ($)','suicides/100k pop']].groupby('country-year').get_group(countryyear)['suicides/100k pop'].sum())
-
     # plot
-    fig = px.scatter(x=gdp,y=suicides)
+    fig = px.scatter(df[4],x='gdp',y='suicides')
     fig.update_layout(
         title="GDP vs Suicide Rates",
         xaxis_title="Gdp",
@@ -141,15 +89,10 @@ def gdp_per_capita():
     st.plotly_chart(fig)
 
 def country_best():
-    country_list = list(df['country'].drop_duplicates())
-    country_deaths = []
-    for country in country_list:
-        country_deaths.append(df.groupby('country').get_group(country)['suicides/100k pop'].mean())
-
-    st.write(pd.DataFrame({
-    'country':country_list,
-    'suicide_rate':country_deaths
-    }).sort_values(by='suicide_rate').head())
+    st.header("Countries that have done a great Job in controlling suicide rates")
+    st.write("""\n\n\n\n\n
+    """)
+    st.write("\n",df[5].reset_index(drop=True))
 
 def app():
     suicide_rates()
@@ -175,7 +118,5 @@ def app():
     elif opt1 == "GDP Per Capita":
         gdp_per_capita()
 
-    st.header("Countries that have done a great Job in controlling suicide rates")
-    st.write("""\n\n
-    """)
+    
     country_best()
